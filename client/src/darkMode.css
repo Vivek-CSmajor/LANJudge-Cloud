@@ -129,6 +129,13 @@
 [data-theme="dark"] .problem-card-meta { color: #8b8f9c; }
 [data-theme="dark"] .problem-card-error { color: #f87171; }
 
+[data-theme="dark"] .continue-btn {
+  background: #1c1d24;
+  border-color: #3a3d4a;
+  color: #93b4e8;
+}
+[data-theme="dark"] .continue-btn:hover { background: #23252d; border-color: #454854; }
+
 [data-theme="dark"] .icon-btn {
   background: #1c1d24;
   border-color: #3a3d4a;
@@ -229,3 +236,26 @@
 [data-theme="dark"] .cancel-btn:hover:not(:disabled) { background: #23252d; }
 
 [data-theme="dark"] .no-contest-notice { background: #1c1d24; border-color: #2e303a; color: #c7cad1; }
+
+/* ── Generate & Download page ── */
+[data-theme="dark"] .generate-page {
+  background: #14151b;
+  color: #e5e7eb;
+}
+[data-theme="dark"] .generate-card {
+  background: #1c1d24;
+  border-color: #2e303a;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+[data-theme="dark"] .generate-title { color: #f1f2f4; }
+[data-theme="dark"] .generate-subtitle { color: #8b8f9c; }
+
+[data-theme="dark"] .readiness-item { color: #a8acb8; }
+[data-theme="dark"] .readiness-item svg { color: #454854; }
+[data-theme="dark"] .readiness-item--met { color: #f1f2f4; }
+[data-theme="dark"] .readiness-item--met svg { color: #4ade80; }
+[data-theme="dark"] .readiness-sub-list li { color: #f87171; }
+
+[data-theme="dark"] .generate-success { border-top-color: #2e303a; }
+[data-theme="dark"] .generate-success svg { color: #4ade80; }
+[data-theme="dark"] .generate-success p { color: #c7cad1; }

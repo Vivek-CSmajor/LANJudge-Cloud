@@ -7,8 +7,6 @@ import (
 
 	"campuscodecloud/db"
 	"campuscodecloud/models"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 type createContestRequest struct {
@@ -50,17 +48,16 @@ func CreateContestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hashed, err := bcrypt.GenerateFromPassword([]byte(req.AdminPassword), bcrypt.DefaultCost)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't save the contest. Please try again.")
-		return
-	}
-
 	contest := models.Contest{
 		Name:            req.Name,
 		DurationMinutes: req.DurationMinutes,
 		AdminUsername:   req.AdminUsername,
-		AdminPassword:   string(hashed),
+		// Stored as-is (not hashed): the LAN server compares this literally
+		// against what the admin types in on contest day (see
+		// AdminLoginCode in its judge/fileSystem.go Manifest), the same
+		// way team login codes work there — it's a per-contest access
+		// code, not a persistent account password.
+		AdminPassword: req.AdminPassword,
 	}
 
 	if err := db.Conn().Create(&contest).Error; err != nil {

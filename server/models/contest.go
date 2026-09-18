@@ -10,7 +10,7 @@ type Contest struct {
 	Name            string    `json:"name"`
 	DurationMinutes int       `json:"duration_minutes"`
 	AdminUsername   string    `json:"admin_username"`
-	AdminPassword   string    `json:"-"` // bcrypt hash; never echoed back in API responses
+	AdminPassword   string    `json:"-"` // plaintext admin_login_code for the LAN server; never echoed back in API responses
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }

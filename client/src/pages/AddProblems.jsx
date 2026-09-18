@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   FileText, Timer, MemoryStick, FileCode, Layers, Upload, Type,
-  Plus, Pencil, Trash2, Loader2, AlertCircle, Info, X,
+  Plus, Pencil, Trash2, Loader2, AlertCircle, Info, X, ArrowRight,
 } from 'lucide-react'
 import { listProblems, createProblem, updateProblem, deleteProblem } from '../api/problems'
 import { useContest } from '../state/ContestContext'
@@ -79,7 +79,7 @@ async function groupUploadedFiles(fileList) {
   return { entries, errors }
 }
 
-export default function AddProblems() {
+export default function AddProblems({ onContinue }) {
   const { contest } = useContest()
   const contestId = contest?.id
 
@@ -302,9 +302,14 @@ export default function AddProblems() {
               </p>
             </div>
             {!formOpen && (
-              <button type="button" className="add-problem-btn" onClick={openAddForm}>
-                <Plus size={16} /> Add problem
-              </button>
+              <div className="problems-header-actions">
+                <button type="button" className="continue-btn" onClick={onContinue}>
+                  Continue to Generate Package <ArrowRight size={15} />
+                </button>
+                <button type="button" className="add-problem-btn" onClick={openAddForm}>
+                  <Plus size={16} /> Add problem
+                </button>
+              </div>
             )}
           </div>
 
