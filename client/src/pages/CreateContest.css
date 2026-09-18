@@ -1,0 +1,296 @@
+/* ── Design tokens carried over from CampusCode-Client (Login/Connect) ── */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spin {
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+.create-page {
+  min-height: 100vh;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Fira Code', ui-monospace, Consolas, monospace;
+  font-size: 14px;
+  color: #030229;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Top bar ── */
+.topbar {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  position: relative;
+  z-index: 1;
+}
+
+.topbar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon { color: #3b5998; flex-shrink: 0; }
+.logo { font-size: 18px; font-weight: 700; color: #101828; letter-spacing: -0.3px; }
+.logo-accent { color: #3b5998; }
+
+/* Distinguishes this app from the participant client within the same
+   product suite, without introducing a new visual language. */
+.cloud-badge {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #3b5998;
+  background: rgba(59, 89, 152, 0.1);
+  border: 1px solid rgba(59, 89, 152, 0.22);
+  border-radius: 6px;
+  padding: 3px 7px;
+  margin-left: 2px;
+}
+
+/* ── Main content ── */
+.create-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 16px;
+}
+
+/* ── Card ── */
+.create-card {
+  background: #fff;
+  border: 1px solid #dadada;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 480px;
+  padding: 40px;
+  box-shadow: 0 4px 36px 8px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+.create-card-header { margin-bottom: 28px; }
+
+.create-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #030229;
+  margin: 0 0 6px;
+}
+
+.create-subtitle {
+  font-size: 14px;
+  color: rgba(3, 2, 41, 0.7);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Form ── */
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.create-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.create-field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #030229;
+}
+
+.create-input-wrap {
+  position: relative;
+}
+
+.create-input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8a8a8a;
+  pointer-events: none;
+}
+
+.create-input-wrap input {
+  width: 100%;
+  height: 47px;
+  padding: 0 16px 0 46px;
+  border: 1px solid #e7e7e7;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #030229;
+  outline: none;
+  box-sizing: border-box;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.create-input-wrap input::placeholder { color: #8a8a8a; }
+.create-input-wrap input:hover { border-color: #d5d5d5; }
+.create-input-wrap input:focus {
+  border-color: #3b5998;
+  box-shadow: 0 0 0 4px rgba(59, 89, 152, 0.12);
+}
+
+/* Password field also needs right-side padding to clear the toggle button */
+.create-input-wrap--password input { padding-right: 46px; }
+
+.password-toggle-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: #8a8a8a;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.password-toggle-btn:hover { background: #f2f2f2; color: #5a5a5a; }
+
+/* Admin credentials read as a credential, not prose — set them like the
+   login code field on the participant client does. */
+#adminUsername,
+#adminPassword {
+  font-family: 'Fira Code', ui-monospace, Consolas, monospace;
+  letter-spacing: 0.3px;
+}
+
+.field-hint {
+  font-size: 12.5px;
+  color: #98a2b3;
+  margin: 0;
+}
+
+.field-error {
+  font-size: 12.5px;
+  color: #d92d20;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.field-error svg { flex-shrink: 0; }
+
+.create-input-wrap--error input {
+  border-color: #fda29b;
+}
+.create-input-wrap--error input:focus {
+  border-color: #d92d20;
+  box-shadow: 0 0 0 4px rgba(217, 45, 32, 0.1);
+}
+
+/* ── Submit button ── */
+.create-submit-btn {
+  height: 47px;
+  background: #3b5998;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+  transition: background 0.15s, transform 0.05s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.create-submit-btn:hover:not(:disabled) { background: #324b80; }
+.create-submit-btn:active:not(:disabled) { background: #2a3f6b; transform: translateY(1px); }
+.create-submit-btn:disabled { opacity: 0.65; cursor: default; }
+
+/* ── Footer note ── */
+.create-footer {
+  font-size: 12px;
+  color: #a6a6a6;
+  text-align: center;
+  margin: 24px 0 0;
+  line-height: 1.6;
+}
+
+/* ── Post-success state ── */
+.success-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.success-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f0fdf4;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.success-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #030229;
+  margin: 0 0 6px;
+}
+
+.success-detail {
+  font-size: 14px;
+  color: rgba(3, 2, 41, 0.7);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.success-meta {
+  width: 100%;
+  background: #fafafa;
+  border: 1px solid #e7e7e7;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.success-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.success-meta-label { color: #667085; }
+.success-meta-value { color: #030229; font-weight: 600; }
+
+.success-next-hint {
+  font-size: 12.5px;
+  color: #98a2b3;
+  margin: 18px 0 0;
+  text-align: center;
+  line-height: 1.5;
+}

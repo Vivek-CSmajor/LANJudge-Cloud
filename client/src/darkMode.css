@@ -1,0 +1,92 @@
+/* ────────────────────────────────────────────────────────────────────────
+   Dark mode — purely additive overrides, same pattern as CampusCode-Client:
+   every rule is scoped under [data-theme="dark"], which always outweighs
+   the plain-class light-mode rule it replaces (attribute selector + class
+   beats class alone), so light mode is unaffected regardless of source
+   order. Toggled via useTheme() / <ThemeToggle>, which sets
+   documentElement[data-theme].
+   ──────────────────────────────────────────────────────────────────────── */
+
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }
+
+[data-theme="dark"] .create-page {
+  background: #14151b;
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] .topbar {
+  background: #1a1b21;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .logo { color: #f1f2f4; }
+[data-theme="dark"] .logo-accent,
+[data-theme="dark"] .logo-icon { color: #7c9cd6; }
+[data-theme="dark"] .cloud-badge {
+  color: #93b4e8;
+  background: rgba(124, 156, 214, 0.16);
+  border-color: rgba(124, 156, 214, 0.35);
+}
+
+[data-theme="dark"] .create-card {
+  background: #1c1d24;
+  border-color: #2e303a;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .create-title,
+[data-theme="dark"] .create-field label,
+[data-theme="dark"] .success-title {
+  color: #f1f2f4;
+}
+[data-theme="dark"] .create-subtitle,
+[data-theme="dark"] .success-detail {
+  color: #8b8f9c;
+}
+
+[data-theme="dark"] .field-error,
+[data-theme="dark"] .field-error svg {
+  color: #f87171;
+}
+
+[data-theme="dark"] .success-icon {
+  background: rgba(74, 222, 128, 0.14);
+  color: #4ade80;
+}
+
+[data-theme="dark"] .create-input-icon,
+[data-theme="dark"] .password-toggle-btn,
+[data-theme="dark"] .field-hint,
+[data-theme="dark"] .success-next-hint,
+[data-theme="dark"] .success-meta-label {
+  color: #6b7280;
+}
+[data-theme="dark"] .password-toggle-btn:hover {
+  background: #262832;
+  color: #d7dae0;
+}
+
+[data-theme="dark"] .create-input-wrap input {
+  background: #1c1d24;
+  border-color: #3a3d4a;
+  color: #f1f2f4;
+}
+[data-theme="dark"] .create-input-wrap input::placeholder { color: #6b7280; }
+[data-theme="dark"] .create-input-wrap input:hover { border-color: #454854; }
+[data-theme="dark"] .create-input-wrap input:focus {
+  border-color: #7c9cd6;
+  box-shadow: 0 0 0 4px rgba(124, 156, 214, 0.18);
+}
+[data-theme="dark"] .create-input-wrap--error input { border-color: rgba(248, 113, 113, 0.5); }
+[data-theme="dark"] .create-input-wrap--error input:focus {
+  border-color: #f87171;
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.16);
+}
+
+[data-theme="dark"] .success-meta {
+  background: #191a20;
+  border-color: #3a3d4a;
+}
+[data-theme="dark"] .success-meta-value { color: #f1f2f4; }
+
+[data-theme="dark"] .create-footer { color: #6b7280; }

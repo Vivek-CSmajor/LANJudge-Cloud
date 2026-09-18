@@ -1,0 +1,31 @@
+.theme-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 40;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #d5d5d5;
+  color: #344054;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.14);
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+}
+.theme-toggle-btn:hover { background: #f8fafc; border-color: #c0c4cc; }
+.theme-toggle-btn:active { transform: scale(0.92); }
+
+[data-theme="dark"] .theme-toggle-btn {
+  background: #1c1d24;
+  border-color: #2e303a;
+  color: #e5e7eb;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+[data-theme="dark"] .theme-toggle-btn:hover {
+  background: #22242e;
+  border-color: #3a3d4a;
+}
