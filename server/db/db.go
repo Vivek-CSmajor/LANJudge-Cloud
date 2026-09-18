@@ -17,7 +17,7 @@ func InitDB() {
 		panic(err)
 	}
 	log.Println("DB connection established")
-	if err := database.AutoMigrate(&models.Contest{}); err != nil {
+	if err := database.AutoMigrate(&models.Contest{}, &models.Problem{}, &models.TestCase{}); err != nil {
 		panic(err)
 	}
 	conn = database

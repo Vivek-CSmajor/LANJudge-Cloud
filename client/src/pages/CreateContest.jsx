@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import {
   Trophy, Clock, User, Lock, Eye, EyeOff,
-  Loader2, AlertCircle, CheckCircle2, Code2,
+  Loader2, AlertCircle, CheckCircle2, RefreshCw, ArrowRight,
 } from 'lucide-react'
+import { createContest } from '../api/contests'
 import { useContest } from '../state/ContestContext'
+import CloudHeader from '../components/CloudHeader'
 import './CreateContest.css'
 
 const DRAFT_KEY = 'cc_cloud_create_contest_draft'
-const SUBMIT_DELAY_MS = 700
 
 const DEFAULT_FORM = {
   name: '',
@@ -52,27 +53,28 @@ function validate(form) {
   return errors
 }
 
-export default function CreateContest() {
+export default function CreateContest({ onContinue }) {
   const { setContest } = useContest()
 
   const [form, setForm] = useState(loadDraft)
   const [fieldErrors, setFieldErrors] = useState({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(null)
+  const [submitState, setSubmitState] = useState('idle') // idle | submitting | success | error
+  const [submitError, setSubmitError] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [createdContest, setCreatedContest] = useState(null)
 
   // Persist the draft as the organizer types, so a refresh mid-form
-  // doesn't lose their work. Skipped once submitted, since the draft has
-  // already been cleared and the form is unmounted.
+  // doesn't lose their work. Skipped once the contest has been created,
+  // since the draft has already been cleared and the form is unmounted.
   useEffect(() => {
-    if (submitted) return
+    if (submitState === 'success') return
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(form))
     } catch {
       // localStorage unavailable — the form still works, it just won't
       // survive a refresh this session.
     }
-  }, [form, submitted])
+  }, [form, submitState])
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -85,73 +87,91 @@ export default function CreateContest() {
     })
   }
 
+  async function attemptSubmit(payload) {
+    setSubmitState('submitting')
+    setSubmitError(null)
+    try {
+      const created = await createContest(payload)
+      // The backend-issued id is what an "Add Problems" page (and any
+      // future page) will need to keep working on this contest, so it's
+      // kept in context/localStorage rather than just this component.
+      setContest({
+        id: created.id,
+        name: created.name,
+        durationMinutes: created.duration_minutes,
+        adminUsername: created.admin_username,
+        createdAt: created.created_at,
+      })
+      setCreatedContest(created)
+      try {
+        localStorage.removeItem(DRAFT_KEY)
+      } catch {
+        // nothing to clean up if storage isn't available
+      }
+      setSubmitState('success')
+    } catch (err) {
+      setSubmitError(err.message)
+      setSubmitState('error')
+    }
+  }
+
   function handleSubmit(e) {
     e.preventDefault()
     const errors = validate(form)
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) return
 
-    const payload = {
+    attemptSubmit({
       name: form.name.trim(),
       durationMinutes: Number(form.durationMinutes),
       adminUsername: form.adminUsername.trim(),
       adminPassword: form.adminPassword,
-    }
-
-    setIsSubmitting(true)
-    // Stands in for the real create-contest request, which lands with
-    // backend wiring in a follow-up — this keeps the submitting/disabled
-    // button behavior honest in the meantime.
-    setTimeout(() => {
-      console.log('Create contest submit:', payload)
-      setContest({
-        name: payload.name,
-        durationMinutes: payload.durationMinutes,
-        adminUsername: payload.adminUsername,
-        createdAt: new Date().toISOString(),
-      })
-      try {
-        localStorage.removeItem(DRAFT_KEY)
-      } catch {
-        // nothing to clean up if storage isn't available
-      }
-      setIsSubmitting(false)
-      setSubmitted(payload)
-    }, SUBMIT_DELAY_MS)
+    })
   }
+
+  function handleRetry() {
+    attemptSubmit({
+      name: form.name.trim(),
+      durationMinutes: Number(form.durationMinutes),
+      adminUsername: form.adminUsername.trim(),
+      adminPassword: form.adminPassword,
+    })
+  }
+
+  const isSubmitting = submitState === 'submitting'
 
   return (
     <div className="create-page">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <Code2 size={22} strokeWidth={2.5} className="logo-icon" />
-          <span className="logo">Campus<span className="logo-accent">Code</span></span>
-          <span className="cloud-badge">Cloud</span>
-        </div>
-      </header>
+      <CloudHeader />
 
       <main className="create-main">
         <div className="create-card">
-          {submitted ? (
+          {submitState === 'success' && createdContest ? (
             <div className="success-panel">
               <div className="success-icon">
                 <CheckCircle2 size={26} strokeWidth={2} />
               </div>
               <h2 className="success-title">Contest created</h2>
               <p className="success-detail">
-                "{submitted.name}" is saved. Next you'll add problems to it.
+                "{createdContest.name}" is saved. Next you'll add problems to it.
               </p>
               <div className="success-meta">
                 <div className="success-meta-row">
+                  <span className="success-meta-label">Contest ID</span>
+                  <span className="success-meta-value">{createdContest.id}</span>
+                </div>
+                <div className="success-meta-row">
                   <span className="success-meta-label">Duration</span>
-                  <span className="success-meta-value">{submitted.durationMinutes} min</span>
+                  <span className="success-meta-value">{createdContest.duration_minutes} min</span>
                 </div>
                 <div className="success-meta-row">
                   <span className="success-meta-label">Admin username</span>
-                  <span className="success-meta-value">{submitted.adminUsername}</span>
+                  <span className="success-meta-value">{createdContest.admin_username}</span>
                 </div>
               </div>
-              <p className="success-next-hint">The "Add Problems" page is coming next.</p>
+              <button type="button" className="create-submit-btn" onClick={onContinue}>
+                Continue to Add Problems <ArrowRight size={16} />
+              </button>
             </div>
           ) : (
             <>
@@ -159,6 +179,22 @@ export default function CreateContest() {
                 <h2 className="create-title">Create a new contest</h2>
                 <p className="create-subtitle">Set the basics now — you'll add problems next.</p>
               </div>
+
+              {submitState === 'error' && (
+                <div className="create-notice create-notice--error">
+                  <AlertCircle size={16} strokeWidth={2} />
+                  <div>
+                    <strong>Couldn't save the contest</strong>
+                    <p>{submitError}</p>
+                    <div className="create-notice-actions">
+                      <button type="button" className="notice-retry-btn" onClick={handleRetry}>
+                        <RefreshCw size={12} style={{ marginRight: 4, verticalAlign: -1 }} />
+                        Try again
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="create-form" noValidate>
                 <div className="create-field">

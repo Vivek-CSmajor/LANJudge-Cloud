@@ -1,13 +1,5 @@
 /* ── Design tokens carried over from CampusCode-Client (Login/Connect) ── */
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-.spin {
-  animation: spin 0.75s linear infinite;
-  flex-shrink: 0;
-}
-
 .create-page {
   min-height: 100vh;
   background: #fafafa;
@@ -17,43 +9,6 @@
   font-size: 14px;
   color: #030229;
   -webkit-font-smoothing: antialiased;
-}
-
-/* ── Top bar ── */
-.topbar {
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-  position: relative;
-  z-index: 1;
-}
-
-.topbar-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 24px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.logo-icon { color: #3b5998; flex-shrink: 0; }
-.logo { font-size: 18px; font-weight: 700; color: #101828; letter-spacing: -0.3px; }
-.logo-accent { color: #3b5998; }
-
-/* Distinguishes this app from the participant client within the same
-   product suite, without introducing a new visual language. */
-.cloud-badge {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: #3b5998;
-  background: rgba(59, 89, 152, 0.1);
-  border: 1px solid rgba(59, 89, 152, 0.22);
-  border-radius: 6px;
-  padding: 3px 7px;
-  margin-left: 2px;
 }
 
 /* ── Main content ── */
@@ -92,6 +47,42 @@
   margin: 0;
   line-height: 1.5;
 }
+
+/* ── Notice banners ── */
+.create-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 10px;
+  padding: 13px 14px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+.create-notice svg { flex-shrink: 0; margin-top: 1px; }
+.create-notice strong { display: block; font-size: 13.5px; margin-bottom: 2px; }
+.create-notice p { margin: 0; font-weight: 400; line-height: 1.4; }
+.create-notice-actions { margin-top: 8px; }
+
+.create-notice--error {
+  background: #fef3f2;
+  border: 1px solid #fda29b;
+}
+.create-notice--error svg { color: #d92d20; }
+.create-notice--error strong,
+.create-notice--error p { color: #912018; }
+
+.notice-retry-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #912018;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.notice-retry-btn:hover { color: #7a1a14; }
 
 /* ── Form ── */
 .create-form {
@@ -287,10 +278,6 @@
 .success-meta-label { color: #667085; }
 .success-meta-value { color: #030229; font-weight: 600; }
 
-.success-next-hint {
-  font-size: 12.5px;
-  color: #98a2b3;
-  margin: 18px 0 0;
-  text-align: center;
-  line-height: 1.5;
+.success-panel .create-submit-btn {
+  margin-top: 22px;
 }

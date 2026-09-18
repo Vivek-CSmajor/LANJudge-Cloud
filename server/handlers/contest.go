@@ -7,6 +7,8 @@ import (
 
 	"campuscodecloud/db"
 	"campuscodecloud/models"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type createContestRequest struct {
@@ -48,11 +50,17 @@ func CreateContestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	hashed, err := bcrypt.GenerateFromPassword([]byte(req.AdminPassword), bcrypt.DefaultCost)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Couldn't save the contest. Please try again.")
+		return
+	}
+
 	contest := models.Contest{
 		Name:            req.Name,
 		DurationMinutes: req.DurationMinutes,
 		AdminUsername:   req.AdminUsername,
-		AdminPassword:   req.AdminPassword,
+		AdminPassword:   string(hashed),
 	}
 
 	if err := db.Conn().Create(&contest).Error; err != nil {

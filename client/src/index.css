@@ -13,3 +13,12 @@ body {
 #root {
   min-height: 100svh;
 }
+
+/* Shared spinner used by every "in flight" button across the app. */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spin {
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
