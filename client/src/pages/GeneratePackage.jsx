@@ -93,7 +93,7 @@ export default function GeneratePackage() {
     setGenerateState('generating')
     setGenerateError(null)
     try {
-      const result = await generatePackage(contestId)
+      const result = await generatePackage(contestId, contest.accessToken)
       setPackageResult(result)
       setGenerateState('success')
     } catch (err) {
@@ -111,7 +111,7 @@ export default function GeneratePackage() {
     setBundlePlatform(platform)
     setBundleError(null)
     try {
-      const result = await generateBundle(contestId, platform)
+      const result = await generateBundle(contestId, contest.accessToken, platform)
       triggerDownload(result.blob, result.filename)
     } catch (err) {
       setBundleError(err.message)

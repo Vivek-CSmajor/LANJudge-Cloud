@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"log"
 
 	"campuscodecloud/models"
@@ -11,16 +12,17 @@ import (
 
 var conn *gorm.DB
 
-func InitDB() {
+func InitDB() error {
 	database, err := gorm.Open(sqlite.Open("data/cloud.sqlite"), &gorm.Config{})
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to open database: %w", err)
 	}
 	log.Println("DB connection established")
 	if err := database.AutoMigrate(&models.Contest{}, &models.Problem{}, &models.TestCase{}); err != nil {
-		panic(err)
+		return fmt.Errorf("failed to migrate schema: %w", err)
 	}
 	conn = database
+	return nil
 }
 
 func Conn() *gorm.DB {

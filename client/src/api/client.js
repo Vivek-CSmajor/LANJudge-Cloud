@@ -22,10 +22,14 @@ export function apiFetch(path, options = {}) {
     },
   }).then(
     (res) => res,
-    () => {
+    (err) => {
       // A raw network failure or the timeout above both reject with a
       // DOMException whose .message ("Failed to fetch", "signal timed
-      // out", etc.) isn't something to show a contest organizer.
+      // out", etc.) isn't something to show a contest organizer — but it's
+      // still logged here so a real backend problem (wrong port, CORS
+      // misconfig, the server being down) is visible in devtools instead
+      // of looking identical to "the user's WiFi is down."
+      console.error('apiFetch failed:', err)
       throw new Error("Couldn't reach the CampusCode Cloud server. Check your connection and try again.")
     },
   )

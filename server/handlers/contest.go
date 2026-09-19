@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -26,6 +28,39 @@ func writeError(w http.ResponseWriter, status int, message string) {
 	writeJSON(w, status, map[string]string{"error": message})
 }
 
+func generateAccessToken() (string, error) {
+	b := make([]byte, 24)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
+// RequireContestAccess gates every contest-scoped route behind the token
+// issued when that contest was created. There are no user accounts in this
+// app — this token is the only thing distinguishing an owner from anyone
+// else who can reach the server.
+func RequireContestAccess(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		contestID, ok := parseIDParam(r, "contestID")
+		if !ok {
+			writeError(w, http.StatusBadRequest, "Invalid contest id.")
+			return
+		}
+		var contest models.Contest
+		if err := db.Conn().First(&contest, contestID).Error; err != nil {
+			writeError(w, http.StatusNotFound, "Contest not found.")
+			return
+		}
+		token := r.Header.Get("X-Access-Token")
+		if token == "" || token != contest.AccessToken {
+			writeError(w, http.StatusUnauthorized, "Missing or invalid access token for this contest.")
+			return
+		}
+		next(w, r)
+	}
+}
+
 // CreateContestHandler persists the contest-creation form. Validation is
 // re-checked here even though the client already validates, since the
 // client can't be trusted to be the only caller.
@@ -48,6 +83,12 @@ func CreateContestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	accessToken, err := generateAccessToken()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Couldn't create the contest. Please try again.")
+		return
+	}
+
 	contest := models.Contest{
 		Name:            req.Name,
 		DurationMinutes: req.DurationMinutes,
@@ -58,6 +99,7 @@ func CreateContestHandler(w http.ResponseWriter, r *http.Request) {
 		// way team login codes work there — it's a per-contest access
 		// code, not a persistent account password.
 		AdminPassword: req.AdminPassword,
+		AccessToken:   accessToken,
 	}
 
 	if err := db.Conn().Create(&contest).Error; err != nil {

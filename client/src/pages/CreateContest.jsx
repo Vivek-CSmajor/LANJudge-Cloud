@@ -101,6 +101,7 @@ export default function CreateContest({ onContinue }) {
         durationMinutes: created.duration_minutes,
         adminUsername: created.admin_username,
         createdAt: created.created_at,
+        accessToken: created.access_token,
       })
       setCreatedContest(created)
       try {

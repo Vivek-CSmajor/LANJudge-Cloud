@@ -1,0 +1,56 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+
+# If a second push lands while a deploy is still running, queue it instead
+# of running both at once (two concurrent `go build -o campuscodecloud .` /
+# `systemctl restart` on the same instance could stomp on each other).
+concurrency:
+  group: deploy-ec2
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+
+            # Runs as `ubuntu` with no sudo/user-switching for git or the
+            # build — mirroring the manual process exactly as given. If this
+            # ever fails with a permission error here, see deploy/README.md's
+            # campuscode:campuscode ownership note; that's the likely cause,
+            # and it should be resolved deliberately, not patched around here.
+            cd /opt/campuscode-cloud
+            git pull
+
+            # appleboy/ssh-action runs this as a non-interactive, non-login
+            # shell, which does not source /etc/profile.d/go.sh — put Go on
+            # PATH explicitly so `go build` (inside build.sh) resolves.
+            export PATH="$PATH:/usr/local/go/bin"
+
+            ./deploy/build.sh
+
+            sudo systemctl restart campuscode-cloud
+
+            # `restart` returning success only means systemd accepted the
+            # request, not that the new binary actually started — confirm it
+            # for real before calling this deploy done.
+            sleep 5
+            if sudo systemctl is-active --quiet campuscode-cloud; then
+              echo "campuscode-cloud is active"
+            else
+              echo "::error::campuscode-cloud is not active after restart"
+              sudo systemctl status campuscode-cloud --no-pager || true
+              sudo journalctl -u campuscode-cloud -n 50 --no-pager || true
+              exit 1
+            fi

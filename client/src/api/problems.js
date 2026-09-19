@@ -43,28 +43,35 @@ async function readResponse(res, fallbackMessage) {
   throw new Error(message)
 }
 
-export async function listProblems(contestId) {
-  const res = await apiFetch(`/contests/${contestId}/problems`)
+export async function listProblems(contestId, accessToken) {
+  const res = await apiFetch(`/contests/${contestId}/problems`, {
+    headers: { 'X-Access-Token': accessToken },
+  })
   return readResponse(res, "Couldn't load problems. Please try again.")
 }
 
-export async function createProblem(contestId, problem) {
+export async function createProblem(contestId, accessToken, problem) {
   const res = await apiFetch(`/contests/${contestId}/problems`, {
     method: 'POST',
+    headers: { 'X-Access-Token': accessToken },
     body: buildProblemFormData(problem),
   })
   return readResponse(res, `Couldn't save the problem (${res.status}). Please try again.`)
 }
 
-export async function updateProblem(contestId, problemId, problem) {
+export async function updateProblem(contestId, accessToken, problemId, problem) {
   const res = await apiFetch(`/contests/${contestId}/problems/${problemId}`, {
     method: 'PUT',
+    headers: { 'X-Access-Token': accessToken },
     body: buildProblemFormData(problem),
   })
   return readResponse(res, `Couldn't save the problem (${res.status}). Please try again.`)
 }
 
-export async function deleteProblem(contestId, problemId) {
-  const res = await apiFetch(`/contests/${contestId}/problems/${problemId}`, { method: 'DELETE' })
+export async function deleteProblem(contestId, accessToken, problemId) {
+  const res = await apiFetch(`/contests/${contestId}/problems/${problemId}`, {
+    method: 'DELETE',
+    headers: { 'X-Access-Token': accessToken },
+  })
   return readResponse(res, `Couldn't delete the problem (${res.status}). Please try again.`)
 }

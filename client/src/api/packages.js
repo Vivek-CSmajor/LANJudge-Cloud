@@ -11,9 +11,10 @@ const GENERATE_TIMEOUT_MS = 60000
  * @returns {Promise<{ blob: Blob, filename: string }>}
  * @throws {Error} with a user-facing message on failure
  */
-export async function generatePackage(contestId) {
+export async function generatePackage(contestId, accessToken) {
   const res = await apiFetch(`/contests/${contestId}/package`, {
     method: 'POST',
+    headers: { 'X-Access-Token': accessToken },
     signal: AbortSignal.timeout(GENERATE_TIMEOUT_MS),
   })
 
@@ -44,9 +45,10 @@ export async function generatePackage(contestId) {
  * @returns {Promise<{ blob: Blob, filename: string }>}
  * @throws {Error} with a user-facing message on failure
  */
-export async function generateBundle(contestId, platform) {
+export async function generateBundle(contestId, accessToken, platform) {
   const res = await apiFetch(`/contests/${contestId}/bundle/${platform}`, {
     method: 'POST',
+    headers: { 'X-Access-Token': accessToken },
     signal: AbortSignal.timeout(GENERATE_TIMEOUT_MS),
   })
 

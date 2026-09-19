@@ -209,6 +209,12 @@ var validPlatforms = map[string]bool{
 	"macos-arm":   true,
 }
 
+// bundleSemaphore bounds how many bundle downloads (each streaming a
+// platform's ~130-150MB installer) can be in flight at once. The target
+// deployment is a 1GB-RAM instance; two or three of these concurrently is
+// already a meaningful fraction of that.
+var bundleSemaphore = make(chan struct{}, 2)
+
 // GenerateBundleHandler builds the same contest package GeneratePackageHandler
 // does, then wraps it together with the requested platform's pre-built bundle
 // into one outer zip, so the organizer downloads a single file containing
@@ -253,48 +259,56 @@ func GenerateBundleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bundleZip, err := buildPlatformBundle(platform, contestZip)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't assemble the platform bundle. Please try again.")
-		return
-	}
-
-	filename := slugify(contest.Name) + "-" + platform + "-bundle.zip"
-	w.Header().Set("Content-Type", "application/zip")
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
-	w.Header().Set("Content-Length", strconv.Itoa(len(bundleZip)))
-	w.WriteHeader(http.StatusOK)
-	w.Write(bundleZip)
-}
-
-// buildPlatformBundle nests the already-built contest package zip alongside
-// every file in the platform's pre-built bundle directory, into one outer zip.
-func buildPlatformBundle(platform string, contestZip []byte) ([]byte, error) {
-	buf := &bytes.Buffer{}
-	zw := zip.NewWriter(buf)
-
-	if err := writeBytesEntry(zw, "contest-package.zip", contestZip); err != nil {
-		return nil, err
-	}
-
+	// Checked before anything is written to the response, so a missing
+	// platform directory still produces a clean JSON error instead of a
+	// truncated zip — once headers below are sent, that's no longer possible.
 	bundleDir := filepath.Join(platformBundleRoot, platform)
 	entries, err := os.ReadDir(bundleDir)
 	if err != nil {
-		return nil, fmt.Errorf("platform bundle for %q is not available on this server: %w", platform, err)
+		writeError(w, http.StatusInternalServerError, "This platform's bundle isn't available on the server right now.")
+		return
+	}
+
+	select {
+	case bundleSemaphore <- struct{}{}:
+		defer func() { <-bundleSemaphore }()
+	default:
+		writeError(w, http.StatusTooManyRequests, "Server is busy building another bundle. Please try again in a moment.")
+		return
+	}
+
+	// No Content-Length: the bundle (up to ~150MB, dominated by the
+	// platform's installer) is streamed straight into the response as the
+	// zip is built rather than assembled in memory first, so the total
+	// size isn't known upfront. Browsers handle this fine.
+	filename := slugify(contest.Name) + "-" + platform + "-bundle.zip"
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	w.WriteHeader(http.StatusOK)
+
+	streamPlatformBundle(w, entries, bundleDir, contestZip)
+}
+
+// streamPlatformBundle writes the already-built contest package zip
+// alongside every file in the platform's pre-built bundle directory,
+// straight into w as one outer zip — nothing is buffered in memory beyond
+// one file's read/write chunks at a time. Errors here can't be reported to
+// the client anymore (headers are already sent); the response is just cut
+// short, which is the standard, accepted tradeoff for a streamed download.
+func streamPlatformBundle(w io.Writer, entries []os.DirEntry, bundleDir string, contestZip []byte) {
+	zw := zip.NewWriter(w)
+	if err := writeBytesEntry(zw, "contest-package.zip", contestZip); err != nil {
+		return
 	}
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
 		}
 		if err := writeFileEntry(zw, entry.Name(), filepath.Join(bundleDir, entry.Name())); err != nil {
-			return nil, err
+			return
 		}
 	}
-
-	if err := zw.Close(); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+	zw.Close()
 }
 
 func writeBytesEntry(zw *zip.Writer, name string, data []byte) error {

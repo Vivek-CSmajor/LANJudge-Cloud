@@ -11,6 +11,19 @@ import './AddProblems.css'
 
 const EMPTY_FORM = { title: '', timeLimitSeconds: '1', memoryLimitMB: '256', statement: '' }
 
+// crypto.randomUUID() only exists in "secure contexts" (HTTPS, or the
+// literal host "localhost") — it's undefined and throws on a plain-HTTP
+// deployment reached by IP or a non-localhost hostname, which crashed the
+// whole page here since nothing catches render-time exceptions. These ids
+// are only ever used as a local React key / removal target (never sent to
+// the backend — only an *existing* test case's real database id is), so
+// they don't need to be cryptographically random at all.
+let localIdCounter = 0
+function nextLocalId() {
+  localIdCounter += 1
+  return `local-${localIdCounter}`
+}
+
 function draftKey(contestId) {
   return `cc_cloud_problem_draft_${contestId}`
 }
@@ -68,7 +81,7 @@ async function groupUploadedFiles(fileList) {
   for (const [base, group] of groups) {
     if (group.in && group.out) {
       const [inputText, outputText] = await Promise.all([group.in.text(), group.out.text()])
-      entries.push({ id: crypto.randomUUID(), label: base, inputText, outputText, source: 'upload' })
+      entries.push({ id: nextLocalId(), label: base, inputText, outputText, source: 'upload' })
     } else if (group.in) {
       errors.push(`"${base}.in" has no matching "${base}.out" — pair skipped.`)
     } else {
@@ -111,7 +124,7 @@ export default function AddProblems({ onContinue }) {
     let cancelled = false
     setListLoading(true)
     setListError(null)
-    listProblems(contestId)
+    listProblems(contestId, contest.accessToken)
       .then(data => { if (!cancelled) setProblems(data ?? []) })
       .catch(err => { if (!cancelled) setListError(err.message) })
       .finally(() => { if (!cancelled) setListLoading(false) })
@@ -127,6 +140,8 @@ export default function AddProblems({ onContinue }) {
     setTestCases(draft.testCases ?? [])
     setEntryMode(draft.entryMode ?? 'upload')
     setEditingId(draft.editingId ?? null)
+    setManualInput(draft.manualInput ?? '')
+    setManualOutput(draft.manualOutput ?? '')
     setFormOpen(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contestId])
@@ -135,11 +150,14 @@ export default function AddProblems({ onContinue }) {
   useEffect(() => {
     if (!contestId || !formOpen) return
     try {
-      localStorage.setItem(draftKey(contestId), JSON.stringify({ form, testCases, entryMode, editingId }))
+      localStorage.setItem(
+        draftKey(contestId),
+        JSON.stringify({ form, testCases, entryMode, editingId, manualInput, manualOutput }),
+      )
     } catch {
       // localStorage unavailable — the form still works, it just won't survive a refresh.
     }
-  }, [contestId, formOpen, form, testCases, entryMode, editingId])
+  }, [contestId, formOpen, form, testCases, entryMode, editingId, manualInput, manualOutput])
 
   function clearDraft() {
     try { localStorage.removeItem(draftKey(contestId)) } catch { /* nothing to clean up */ }
@@ -216,7 +234,7 @@ export default function AddProblems({ onContinue }) {
   function addManualEntry() {
     if (!manualInput.trim() || !manualOutput.trim()) return
     const label = `Manual ${testCases.filter(tc => tc.source === 'manual').length + 1}`
-    setTestCases(tc => [...tc, { id: crypto.randomUUID(), label, inputText: manualInput, outputText: manualOutput, source: 'manual' }])
+    setTestCases(tc => [...tc, { id: nextLocalId(), label, inputText: manualInput, outputText: manualOutput, source: 'manual' }])
     setManualInput('')
     setManualOutput('')
     clearTestCasesError()
@@ -244,8 +262,8 @@ export default function AddProblems({ onContinue }) {
     setSaveError(null)
     try {
       const saved = editingId
-        ? await updateProblem(contestId, editingId, payload)
-        : await createProblem(contestId, payload)
+        ? await updateProblem(contestId, contest.accessToken, editingId, payload)
+        : await createProblem(contestId, contest.accessToken, payload)
 
       setProblems(list => (editingId ? list.map(p => (p.id === saved.id ? saved : p)) : [...list, saved]))
       clearDraft()
@@ -261,7 +279,7 @@ export default function AddProblems({ onContinue }) {
     setDeletingId(problem.id)
     setDeleteError(null)
     try {
-      await deleteProblem(contestId, problem.id)
+      await deleteProblem(contestId, contest.accessToken, problem.id)
       setProblems(list => list.filter(p => p.id !== problem.id))
     } catch (err) {
       setDeleteError({ id: problem.id, message: err.message })

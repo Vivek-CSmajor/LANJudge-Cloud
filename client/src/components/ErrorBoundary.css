@@ -1,0 +1,49 @@
+.error-boundary-page {
+  min-height: 100vh;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-family: 'Fira Code', ui-monospace, Consolas, monospace;
+}
+
+.error-boundary-card {
+  background: #fff;
+  border: 1px solid #dadada;
+  border-radius: 10px;
+  max-width: 420px;
+  width: 100%;
+  padding: 32px;
+  box-shadow: 0 4px 36px 8px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+  text-align: center;
+}
+.error-boundary-card svg { color: #d92d20; }
+.error-boundary-card h2 { font-size: 16px; font-weight: 600; color: #030229; margin: 12px 0 6px; }
+.error-boundary-card p {
+  font-size: 13.5px;
+  color: rgba(3, 2, 41, 0.65);
+  margin: 0 0 20px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.error-boundary-card button {
+  height: 44px;
+  padding: 0 20px;
+  background: #3b5998;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
+.error-boundary-card button:hover { background: #324b80; }
+
+[data-theme="dark"] .error-boundary-page { background: #14151b; }
+[data-theme="dark"] .error-boundary-card { background: #1c1d24; border-color: #2e303a; }
+[data-theme="dark"] .error-boundary-card h2 { color: #f1f2f4; }
+[data-theme="dark"] .error-boundary-card p { color: #8b8f9c; }

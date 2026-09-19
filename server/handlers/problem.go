@@ -19,6 +19,11 @@ import (
 // to temp disk on its own — this isn't a hard cap on upload size.
 const maxUploadMemory = 32 << 20
 
+// maxRequestBodySize is the actual hard cap — http.MaxBytesReader rejects
+// anything past this before ParseMultipartForm ever gets to decide where
+// to put it (memory vs. temp disk).
+const maxRequestBodySize = 50 << 20
+
 var errValidation = errors.New("validation")
 
 type testCaseInput struct {
@@ -168,6 +173,7 @@ func CreateProblemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBodySize)
 	form, message, err := parseProblemForm(r)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, message)
@@ -238,6 +244,7 @@ func UpdateProblemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBodySize)
 	form, message, err := parseProblemForm(r)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, message)
@@ -267,6 +274,15 @@ func UpdateProblemHandler(w http.ResponseWriter, r *http.Request) {
 			toDelete = append(toDelete, id)
 		}
 	}
+
+	// Test case files are written to disk inside the loop below, but a
+	// filesystem write isn't part of the DB transaction it's nested in —
+	// if a later test case in this same request fails, the transaction
+	// rolls back the rows but not files already written for earlier ones
+	// in this loop. writtenIDs tracks exactly those so they can be cleaned
+	// up on failure, the same way CreateProblemHandler removes its whole
+	// (all-new) problem directory on failure.
+	var writtenIDs []uint
 
 	txErr := db.Conn().Transaction(func(tx *gorm.DB) error {
 		existing.Title = form.Title
@@ -300,6 +316,7 @@ func UpdateProblemHandler(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				return err
 			}
+			writtenIDs = append(writtenIDs, row.ID)
 			row.InputPath = inputPath
 			row.OutputPath = outputPath
 			if err := tx.Save(&row).Error; err != nil {
@@ -309,6 +326,9 @@ func UpdateProblemHandler(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 	if txErr != nil {
+		for _, id := range writtenIDs {
+			storage.RemoveTestCaseFiles(existing.ID, id)
+		}
 		writeError(w, http.StatusInternalServerError, "Couldn't update the problem. Please try again.")
 		return
 	}

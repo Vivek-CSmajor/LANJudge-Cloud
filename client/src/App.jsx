@@ -3,6 +3,7 @@ import CreateContest from './pages/CreateContest'
 import AddProblems from './pages/AddProblems'
 import GeneratePackage from './pages/GeneratePackage'
 import ThemeToggle from './components/ThemeToggle'
+import ErrorBoundary from './components/ErrorBoundary'
 import { ContestProvider, useContest } from './state/ContestContext'
 import { useTheme } from './hooks/useTheme'
 
@@ -26,9 +27,11 @@ export default function App() {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <ContestProvider>
-      <ThemeToggle theme={theme} onToggle={toggleTheme} />
-      <AppShell />
-    </ContestProvider>
+    <ErrorBoundary>
+      <ContestProvider>
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        <AppShell />
+      </ContestProvider>
+    </ErrorBoundary>
   )
 }
