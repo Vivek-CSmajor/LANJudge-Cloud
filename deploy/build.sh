@@ -26,3 +26,4 @@ cd "$ROOT_DIR/server"
 go build -o "$BINARY_NAME" .
 
 echo "==> Done: $ROOT_DIR/server/$BINARY_NAME"
+
