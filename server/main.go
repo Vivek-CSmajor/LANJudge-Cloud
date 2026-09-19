@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"campuscodecloud/db"
 	"campuscodecloud/handlers"
@@ -37,8 +38,20 @@ func main() {
 	http.HandleFunc("POST /contests/{contestID}/package", handlers.GeneratePackageHandler)
 	http.HandleFunc("POST /contests/{contestID}/bundle/{platform}", handlers.GenerateBundleHandler)
 
-	log.Println("CampusCode Cloud server listening on :8081")
-	if err := http.ListenAndServe(":8081", cors(http.DefaultServeMux)); err != nil {
+	// Embedded static frontend — fallback, only catches what nothing above
+	// matched (same pattern as CampusCode-Server/Backend/api/server.go).
+	http.Handle("/", frontendHandler())
+
+	// $PORT is read from the environment (e.g. set in the systemd unit's
+	// EnvironmentFile) so the listen port is configurable without a code
+	// change; 8081 stays the default for local dev where nothing sets it.
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8081"
+	}
+
+	log.Printf("CampusCode Cloud server listening on :%s\n", port)
+	if err := http.ListenAndServe(":"+port, cors(http.DefaultServeMux)); err != nil {
 		log.Fatal("Server failed to start: ", err)
 	}
 }

@@ -1,4 +1,9 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8081'
+// A production build is embedded into the Go server and served same-origin
+// (see server/web.go), so relative paths are correct by default. Only the
+// `vite dev` server (a separate process on its own port, see vite.config.js)
+// needs to point across origins at the Go backend. VITE_API_URL still wins
+// when set, for anyone deploying the two apart instead of embedding them.
+const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? 'http://localhost:8081' : '')
 
 export function apiFetch(path, options = {}) {
   // A FormData body needs the browser to set its own multipart boundary in

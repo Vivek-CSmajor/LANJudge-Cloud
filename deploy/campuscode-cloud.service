@@ -1,0 +1,39 @@
+# CampusCode Cloud — systemd service unit
+#
+# Placeholders to replace before installing this file:
+#   <APP_DIR>   Absolute path where this repo lives on the instance,
+#               e.g. /opt/campuscode-cloud (see deploy/README.md)
+#   <APP_USER>  The dedicated, non-root system user this runs as
+#               (deploy/README.md shows how to create one)
+#
+# Install:
+#   sudo cp deploy/campuscode-cloud.service /etc/systemd/system/
+#   sudo nano /etc/systemd/system/campuscode-cloud.service   # fill in placeholders
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now campuscode-cloud
+
+[Unit]
+Description=CampusCode Cloud
+After=network.target
+
+[Service]
+Type=simple
+User=<APP_USER>
+WorkingDirectory=<APP_DIR>/server
+ExecStart=<APP_DIR>/server/campuscodecloud
+
+# All of this app's runtime state (server/data/cloud.sqlite,
+# server/data/testcases/, server/data/platform-bundles/) is read/written
+# as paths relative to the working directory above — WorkingDirectory must
+# be correct or the app will create a fresh, empty data/ in the wrong place.
+
+# Optional: set PORT (defaults to 8081) or any future config/secrets here,
+# one KEY=VALUE per line. The leading "-" means systemd won't fail to
+# start if this file doesn't exist yet.
+EnvironmentFile=-<APP_DIR>/server/.env
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
