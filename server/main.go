@@ -50,6 +50,10 @@ func main() {
 	http.HandleFunc("DELETE /contests/{contestID}/problems/{problemID}", handlers.RequireContestAccess(handlers.DeleteProblemHandler))
 	http.HandleFunc("POST /contests/{contestID}/package", handlers.RequireContestAccess(handlers.GeneratePackageHandler))
 	http.HandleFunc("POST /contests/{contestID}/bundle/{platform}", handlers.RequireContestAccess(handlers.GenerateBundleHandler))
+	// Not contest-scoped and not gated by RequireContestAccess — the
+	// participant client installer is the same file for everyone, no
+	// access token needed to get it.
+	http.HandleFunc("GET /client-download/{platform}", handlers.ClientDownloadHandler)
 
 	// Embedded static frontend — fallback, only catches what nothing above
 	// matched (same pattern as CampusCode-Server/Backend/api/server.go).

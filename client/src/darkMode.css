@@ -259,3 +259,36 @@
 [data-theme="dark"] .generate-success { border-top-color: #2e303a; }
 [data-theme="dark"] .generate-success svg { color: #4ade80; }
 [data-theme="dark"] .generate-success p { color: #c7cad1; }
+
+/* ── Landing page ── */
+[data-theme="dark"] .landing-page { background: #14151b; color: #e5e7eb; }
+[data-theme="dark"] .landing-title { color: #f1f2f4; }
+[data-theme="dark"] .landing-subtitle { color: #8b8f9c; }
+[data-theme="dark"] .landing-card {
+  background: #1c1d24;
+  border-color: #2e303a;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+[data-theme="dark"] .landing-card:hover {
+  border-color: #7c9cd6;
+  box-shadow: 0 8px 28px rgba(124, 156, 214, 0.14);
+}
+[data-theme="dark"] .landing-card svg { color: #7c9cd6; }
+[data-theme="dark"] .landing-card h2 { color: #f1f2f4; }
+[data-theme="dark"] .landing-card p { color: #8b8f9c; }
+[data-theme="dark"] .landing-card-cta { color: #93b4e8; }
+
+/* ── Download Participant App page ── */
+[data-theme="dark"] .download-client-page { background: #14151b; color: #e5e7eb; }
+[data-theme="dark"] .back-btn { color: #8b8f9c; }
+[data-theme="dark"] .back-btn:hover { color: #93b4e8; }
+[data-theme="dark"] .download-client-title { color: #f1f2f4; }
+[data-theme="dark"] .download-client-subtitle { color: #8b8f9c; }
+[data-theme="dark"] .platform-card {
+  background: #1c1d24;
+  border-color: #2e303a;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+[data-theme="dark"] .platform-card svg { color: #7c9cd6; }
+[data-theme="dark"] .platform-card h3 { color: #f1f2f4; }
+[data-theme="dark"] .platform-error { color: #f87171; }
