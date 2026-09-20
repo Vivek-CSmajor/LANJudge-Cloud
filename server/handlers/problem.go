@@ -154,7 +154,7 @@ func ListProblemsHandler(w http.ResponseWriter, r *http.Request) {
 		Where("contest_id = ?", contestID).
 		Order("created_at ASC").
 		Find(&problems).Error; err != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't load problems. Please try again.")
+		writeInternalError(w, "list problems", err, "Couldn't load problems. Please try again.")
 		return
 	}
 
@@ -216,7 +216,7 @@ func CreateProblemHandler(w http.ResponseWriter, r *http.Request) {
 	})
 	if txErr != nil {
 		storage.RemoveProblemDir(problem.ID)
-		writeError(w, http.StatusInternalServerError, "Couldn't save the problem. Please try again.")
+		writeInternalError(w, "create problem", txErr, "Couldn't save the problem. Please try again.")
 		return
 	}
 
@@ -253,7 +253,7 @@ func UpdateProblemHandler(w http.ResponseWriter, r *http.Request) {
 
 	var currentIDs []uint
 	if err := db.Conn().Model(&models.TestCase{}).Where("problem_id = ?", problemID).Pluck("id", &currentIDs).Error; err != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't update the problem. Please try again.")
+		writeInternalError(w, "list existing test case ids", err, "Couldn't update the problem. Please try again.")
 		return
 	}
 	currentSet := make(map[uint]bool, len(currentIDs))
@@ -329,7 +329,7 @@ func UpdateProblemHandler(w http.ResponseWriter, r *http.Request) {
 		for _, id := range writtenIDs {
 			storage.RemoveTestCaseFiles(existing.ID, id)
 		}
-		writeError(w, http.StatusInternalServerError, "Couldn't update the problem. Please try again.")
+		writeInternalError(w, "update problem", txErr, "Couldn't update the problem. Please try again.")
 		return
 	}
 
@@ -339,7 +339,7 @@ func UpdateProblemHandler(w http.ResponseWriter, r *http.Request) {
 
 	var updated models.Problem
 	if err := db.Conn().Preload("TestCases", orderedTestCases).First(&updated, existing.ID).Error; err != nil {
-		writeError(w, http.StatusInternalServerError, "Problem was saved but couldn't be reloaded.")
+		writeInternalError(w, "reload updated problem", err, "Problem was saved but couldn't be reloaded.")
 		return
 	}
 
@@ -373,7 +373,7 @@ func DeleteProblemHandler(w http.ResponseWriter, r *http.Request) {
 		return tx.Delete(&existing).Error
 	})
 	if txErr != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't delete the problem. Please try again.")
+		writeInternalError(w, "delete problem", txErr, "Couldn't delete the problem. Please try again.")
 		return
 	}
 

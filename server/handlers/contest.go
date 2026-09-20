@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 
@@ -26,6 +27,16 @@ func writeJSON(w http.ResponseWriter, status int, body any) {
 
 func writeError(w http.ResponseWriter, status int, message string) {
 	writeJSON(w, status, map[string]string{"error": message})
+}
+
+// writeInternalError logs the real underlying error server-side — visible
+// via journalctl/stdout — before returning only a generic message to the
+// client. Every 500 response used to just discard its Go error entirely,
+// which is why a real failure showed nothing in the logs and only a vague
+// message on the client: there was nothing recording what actually broke.
+func writeInternalError(w http.ResponseWriter, context string, err error, publicMessage string) {
+	log.Printf("%s: %v", context, err)
+	writeError(w, http.StatusInternalServerError, publicMessage)
 }
 
 func generateAccessToken() (string, error) {
@@ -85,7 +96,7 @@ func CreateContestHandler(w http.ResponseWriter, r *http.Request) {
 
 	accessToken, err := generateAccessToken()
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't create the contest. Please try again.")
+		writeInternalError(w, "generateAccessToken", err, "Couldn't create the contest. Please try again.")
 		return
 	}
 
@@ -103,7 +114,7 @@ func CreateContestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := db.Conn().Create(&contest).Error; err != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't save the contest. Please try again.")
+		writeInternalError(w, "create contest", err, "Couldn't save the contest. Please try again.")
 		return
 	}
 

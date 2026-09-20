@@ -113,7 +113,7 @@ func GeneratePackageHandler(w http.ResponseWriter, r *http.Request) {
 		Where("contest_id = ?", contestID).
 		Order("created_at ASC").
 		Find(&problems).Error; err != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't load problems. Please try again.")
+		writeInternalError(w, "list problems for package", err, "Couldn't load problems. Please try again.")
 		return
 	}
 
@@ -124,7 +124,7 @@ func GeneratePackageHandler(w http.ResponseWriter, r *http.Request) {
 
 	zipBytes, err := buildContestPackage(contest, problems)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't generate the package. Please try again.")
+		writeInternalError(w, "build contest package", err, "Couldn't generate the package. Please try again.")
 		return
 	}
 
@@ -244,7 +244,7 @@ func GenerateBundleHandler(w http.ResponseWriter, r *http.Request) {
 		Where("contest_id = ?", contestID).
 		Order("created_at ASC").
 		Find(&problems).Error; err != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't load problems. Please try again.")
+		writeInternalError(w, "list problems for bundle", err, "Couldn't load problems. Please try again.")
 		return
 	}
 
@@ -255,7 +255,7 @@ func GenerateBundleHandler(w http.ResponseWriter, r *http.Request) {
 
 	contestZip, err := buildContestPackage(contest, problems)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "Couldn't generate the package. Please try again.")
+		writeInternalError(w, "build contest package for bundle", err, "Couldn't generate the package. Please try again.")
 		return
 	}
 
@@ -265,7 +265,7 @@ func GenerateBundleHandler(w http.ResponseWriter, r *http.Request) {
 	bundleDir := filepath.Join(platformBundleRoot, platform)
 	entries, err := os.ReadDir(bundleDir)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "This platform's bundle isn't available on the server right now.")
+		writeInternalError(w, "read platform bundle dir "+bundleDir, err, "This platform's bundle isn't available on the server right now.")
 		return
 	}
 
