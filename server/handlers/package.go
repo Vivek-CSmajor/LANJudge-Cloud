@@ -302,6 +302,10 @@ func writeStringEntry(zw *zip.Writer, name, content string) error {
 	return err
 }
 
+// writeFileEntry preserves srcPath's real file mode (via FileInfoHeader)
+// rather than zw.Create's default of a non-executable 0666 — without this,
+// campuscode-server, setup.sh, and launch.command would all lose their
+// executable bit on extraction, defeating the one-click launch entirely.
 func writeFileEntry(zw *zip.Writer, name, srcPath string) error {
 	src, err := os.Open(srcPath)
 	if err != nil {
@@ -309,7 +313,18 @@ func writeFileEntry(zw *zip.Writer, name, srcPath string) error {
 	}
 	defer src.Close()
 
-	entry, err := zw.Create(name)
+	info, err := src.Stat()
+	if err != nil {
+		return err
+	}
+	header, err := zip.FileInfoHeader(info)
+	if err != nil {
+		return err
+	}
+	header.Name = name
+	header.Method = zip.Deflate
+
+	entry, err := zw.CreateHeader(header)
 	if err != nil {
 		return err
 	}
