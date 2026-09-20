@@ -114,43 +114,9 @@
 .generate-btn:active:not(:disabled) { background: #2a3f6b; transform: translateY(1px); }
 .generate-btn:disabled { opacity: 0.45; cursor: default; }
 
-/* ── Success + download ── */
-.generate-success {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 10px;
-  padding-top: 6px;
-  border-top: 1px solid #eee;
-}
-.generate-success svg { color: #16a34a; }
-.generate-success p { margin: 0; font-size: 13.5px; color: #364152; }
-
-.download-btn {
-  height: 44px;
-  padding: 0 20px;
-  background: #3b5998;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-family: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  transition: background 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.download-btn:hover { background: #324b80; }
-
 /* ── Platform bundle picker ── */
 .bundle-picker {
   width: 100%;
-  margin-top: 18px;
   padding-top: 18px;
   border-top: 1px solid #eee;
 }

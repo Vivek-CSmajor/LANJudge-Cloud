@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, Circle, AlertCircle, Loader2, Package, Download, Home } from 'lucide-react'
+import { CheckCircle2, Circle, AlertCircle, Loader2, Download, Home } from 'lucide-react'
 import { listProblems } from '../api/problems'
-import { generatePackage, generateBundle } from '../api/packages'
+import { generateBundle } from '../api/packages'
 import { useContest } from '../state/ContestContext'
 import CloudHeader from '../components/CloudHeader'
 import './GeneratePackage.css'
@@ -80,10 +80,6 @@ export default function GeneratePackage({ onHome }) {
   const [listLoading, setListLoading] = useState(true)
   const [listError, setListError] = useState(null)
 
-  const [generateState, setGenerateState] = useState('idle') // idle | generating | success | error
-  const [generateError, setGenerateError] = useState(null)
-  const [packageResult, setPackageResult] = useState(null) // { blob, filename }
-
   const [bundlePlatform, setBundlePlatform] = useState(null) // which platform is currently downloading, if any
   const [bundleError, setBundleError] = useState(null)
 
@@ -101,29 +97,6 @@ export default function GeneratePackage({ onHome }) {
 
   const readiness = useMemo(() => computeReadiness(contest, problems), [contest, problems])
   const allReady = readiness.every(item => item.met)
-  const isGenerating = generateState === 'generating'
-  const totalTestCases = useMemo(
-    () => problems.reduce((sum, p) => sum + (p.test_cases?.length ?? 0), 0),
-    [problems],
-  )
-
-  async function handleGenerate() {
-    setGenerateState('generating')
-    setGenerateError(null)
-    try {
-      const result = await generatePackage(contestId, contest.accessToken)
-      setPackageResult(result)
-      setGenerateState('success')
-    } catch (err) {
-      setGenerateError(err.message)
-      setGenerateState('error')
-    }
-  }
-
-  function handleDownload() {
-    if (!packageResult) return
-    triggerDownload(packageResult.blob, packageResult.filename)
-  }
 
   async function handleDownloadBundle(platform) {
     setBundlePlatform(platform)
@@ -175,7 +148,7 @@ export default function GeneratePackage({ onHome }) {
           <div className="generate-card-header">
             <h2 className="generate-title">Generate & download package</h2>
             <p className="generate-subtitle">
-              {contest.name} · Review the checklist, then export this contest for the LAN server.
+              {contest.name} · Review the checklist, then download the package for your organizer laptop.
             </p>
           </div>
 
@@ -201,60 +174,32 @@ export default function GeneratePackage({ onHome }) {
                 ))}
               </ul>
 
-              {generateState === 'error' && (
-                <div className="inline-error"><AlertCircle size={14} /> {generateError}</div>
+              {bundleError && (
+                <div className="inline-error"><AlertCircle size={14} /> {bundleError}</div>
               )}
 
-              {generateState === 'success' && packageResult ? (
-                <div className="generate-success">
-                  <CheckCircle2 size={20} />
-                  <p>
-                    Package ready — {problems.length} problem{problems.length === 1 ? '' : 's'},{' '}
-                    {totalTestCases} test case{totalTestCases === 1 ? '' : 's'}.
-                  </p>
-                  <button type="button" className="download-btn" onClick={handleDownload}>
-                    <Download size={16} /> Download package (.zip)
-                  </button>
-
-                  <div className="bundle-picker">
-                    <p className="bundle-picker-label">
-                      Or download the full offline bundle for your organizer laptop —
-                      LAN server + Docker setup script + participant client, all in one file:
-                    </p>
-                    <div className="bundle-picker-options">
-                      {PLATFORMS.map((p) => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          className="bundle-btn"
-                          disabled={bundlePlatform !== null}
-                          onClick={() => handleDownloadBundle(p.id)}
-                        >
-                          {bundlePlatform === p.id
-                            ? <><Loader2 size={15} className="spin" /> Preparing…</>
-                            : <><Download size={15} /> {p.label}</>
-                          }
-                        </button>
-                      ))}
-                    </div>
-                    {bundleError && (
-                      <div className="inline-error"><AlertCircle size={14} /> {bundleError}</div>
-                    )}
-                  </div>
+              <div className="bundle-picker">
+                <p className="bundle-picker-label">
+                  Pick the OS of the laptop that will run the contest — each download includes
+                  the contest data, the LAN server, and its Docker setup script:
+                </p>
+                <div className="bundle-picker-options">
+                  {PLATFORMS.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className="bundle-btn"
+                      disabled={!allReady || bundlePlatform !== null}
+                      onClick={() => handleDownloadBundle(p.id)}
+                    >
+                      {bundlePlatform === p.id
+                        ? <><Loader2 size={15} className="spin" /> Preparing…</>
+                        : <><Download size={15} /> {p.label}</>
+                      }
+                    </button>
+                  ))}
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  className="generate-btn"
-                  disabled={!allReady || isGenerating}
-                  onClick={handleGenerate}
-                >
-                  {isGenerating
-                    ? <><Loader2 size={16} className="spin" /> Generating… this can take a moment</>
-                    : <><Package size={16} /> Generate Package</>
-                  }
-                </button>
-              )}
+              </div>
             </>
           )}
         </div>

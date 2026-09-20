@@ -48,7 +48,6 @@ func main() {
 	http.HandleFunc("POST /contests/{contestID}/problems", handlers.RequireContestAccess(handlers.CreateProblemHandler))
 	http.HandleFunc("PUT /contests/{contestID}/problems/{problemID}", handlers.RequireContestAccess(handlers.UpdateProblemHandler))
 	http.HandleFunc("DELETE /contests/{contestID}/problems/{problemID}", handlers.RequireContestAccess(handlers.DeleteProblemHandler))
-	http.HandleFunc("POST /contests/{contestID}/package", handlers.RequireContestAccess(handlers.GeneratePackageHandler))
 	http.HandleFunc("POST /contests/{contestID}/bundle/{platform}", handlers.RequireContestAccess(handlers.GenerateBundleHandler))
 	// Not contest-scoped and not gated by RequireContestAccess — the
 	// participant client installer is the same file for everyone, no

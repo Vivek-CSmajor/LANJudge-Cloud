@@ -272,9 +272,14 @@
 [data-theme="dark"] .readiness-item--met svg { color: #4ade80; }
 [data-theme="dark"] .readiness-sub-list li { color: #f87171; }
 
-[data-theme="dark"] .generate-success { border-top-color: #2e303a; }
-[data-theme="dark"] .generate-success svg { color: #4ade80; }
-[data-theme="dark"] .generate-success p { color: #c7cad1; }
+[data-theme="dark"] .bundle-picker { border-top-color: #2e303a; }
+[data-theme="dark"] .bundle-picker-label { color: #8b8f9c; }
+[data-theme="dark"] .bundle-btn {
+  background: transparent;
+  border-color: #7c9cd6;
+  color: #93b4e8;
+}
+[data-theme="dark"] .bundle-btn:hover:not(:disabled) { background: #7c9cd6; color: #14151b; }
 
 /* ── Landing page ── */
 [data-theme="dark"] .landing-page { background: #14151b; color: #e5e7eb; }

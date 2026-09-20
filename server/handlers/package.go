@@ -85,60 +85,17 @@ func packageReadinessIssues(contest models.Contest, problems []models.Problem) [
 	return issues
 }
 
-// GeneratePackageHandler builds the exact contest/ tree
-// CampusCode-Server/Backend expects (manifest.json, problems/<n>/meta.json,
-// problems/<n>/statement.md, problems/<n>/tests/<m>.in|out) and streams it
-// back as a zip. Problems and test cases are renumbered sequentially from 1
-// in this package regardless of their Cloud database ids, since the LAN
-// server adopts the manifest's problem ids as its own primary keys
-// (judge.LoadOrInitProblems). Everything is built in memory; if any step
-// fails, nothing has been written anywhere and the response is just an
-// error — there's no partial file left for a client to download.
-func GeneratePackageHandler(w http.ResponseWriter, r *http.Request) {
-	contestID, ok := parseIDParam(r, "contestID")
-	if !ok {
-		writeError(w, http.StatusBadRequest, "Invalid contest id.")
-		return
-	}
-
-	var contest models.Contest
-	if err := db.Conn().First(&contest, contestID).Error; err != nil {
-		writeError(w, http.StatusNotFound, "Contest not found.")
-		return
-	}
-
-	var problems []models.Problem
-	if err := db.Conn().
-		Preload("TestCases", orderedTestCases).
-		Where("contest_id = ?", contestID).
-		Order("created_at ASC").
-		Find(&problems).Error; err != nil {
-		writeInternalError(w, "list problems for package", err, "Couldn't load problems. Please try again.")
-		return
-	}
-
-	if issues := packageReadinessIssues(contest, problems); len(issues) > 0 {
-		writeError(w, http.StatusBadRequest, strings.Join(issues, " "))
-		return
-	}
-
-	zipBytes, err := buildContestPackage(contest, problems)
-	if err != nil {
-		writeInternalError(w, "build contest package", err, "Couldn't generate the package. Please try again.")
-		return
-	}
-
-	filename := slugify(contest.Name) + "-contest.zip"
-	w.Header().Set("Content-Type", "application/zip")
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
-	w.Header().Set("Content-Length", strconv.Itoa(len(zipBytes)))
-	w.WriteHeader(http.StatusOK)
-	w.Write(zipBytes)
-}
-
-// buildContestPackage writes manifest.json/problems at the zip root (no
-// wrapping "contest" folder) so it can be extracted directly into the LAN
-// server's server_data/contest/ directory.
+// buildContestPackage builds the exact contest/ tree CampusCode-Server/Backend
+// expects (manifest.json, problems/<n>/meta.json, problems/<n>/statement.md,
+// problems/<n>/tests/<m>.in|out), writing manifest.json/problems at the zip
+// root (no wrapping "contest" folder) so it can be extracted directly into
+// that server's server_data/contest/ directory. Problems and test cases are
+// renumbered sequentially from 1 regardless of their Cloud database ids,
+// since the LAN server adopts the manifest's problem ids as its own primary
+// keys (judge.LoadOrInitProblems). There used to be a standalone endpoint
+// that returned just this zip on its own; it's gone now (every download is
+// a full per-platform bundle, see GenerateBundleHandler below), but this
+// function remains as the shared piece that bundle handler builds on.
 func buildContestPackage(contest models.Contest, problems []models.Problem) ([]byte, error) {
 	buf := &bytes.Buffer{}
 	zw := zip.NewWriter(buf)
@@ -198,9 +155,11 @@ func buildContestPackage(contest models.Contest, problems []models.Problem) ([]b
 
 // platformBundleRoot mirrors data/testcases' convention: a pre-populated,
 // read-only tree the server ships alongside its own binary. Each platform's
-// directory holds exactly what CampusCode-Server's Part 2 packaging step
-// produced for it — the LAN server binary, the Docker setup script(s), the
-// Electron participant client installer, and a README.
+// directory holds everything CampusCode-Server's Part 2 packaging step
+// produced for it — the LAN server binary, the Docker setup script(s), a
+// README, and the Electron participant client installer. The organizer
+// bundle below (GenerateBundleHandler) zips up everything except that last
+// one; ClientDownloadHandler serves it separately, on its own.
 const platformBundleRoot = "data/platform-bundles"
 
 var validPlatforms = map[string]bool{
@@ -286,22 +245,26 @@ func GenerateBundleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	w.WriteHeader(http.StatusOK)
 
-	streamPlatformBundle(w, entries, bundleDir, contestZip)
+	streamPlatformBundle(w, entries, bundleDir, platform, contestZip)
 }
 
 // streamPlatformBundle writes the already-built contest package zip
-// alongside every file in the platform's pre-built bundle directory,
-// straight into w as one outer zip — nothing is buffered in memory beyond
-// one file's read/write chunks at a time. Errors here can't be reported to
-// the client anymore (headers are already sent); the response is just cut
-// short, which is the standard, accepted tradeoff for a streamed download.
-func streamPlatformBundle(w io.Writer, entries []os.DirEntry, bundleDir string, contestZip []byte) {
+// alongside every file in the platform's pre-built bundle directory except
+// the participant client installer — this bundle is for the organizer's
+// own laptop (contest data + LAN server + Docker setup script), and the
+// client is downloaded separately via ClientDownloadHandler — straight
+// into w as one outer zip. Nothing is buffered in memory beyond one file's
+// read/write chunks at a time. Errors here can't be reported to the client
+// anymore (headers are already sent); the response is just cut short,
+// which is the standard, accepted tradeoff for a streamed download.
+func streamPlatformBundle(w io.Writer, entries []os.DirEntry, bundleDir, platform string, contestZip []byte) {
 	zw := zip.NewWriter(w)
 	if err := writeBytesEntry(zw, "contest-package.zip", contestZip); err != nil {
 		return
 	}
+	clientInstaller := clientInstallerFilenames[platform]
 	for _, entry := range entries {
-		if entry.IsDir() {
+		if entry.IsDir() || entry.Name() == clientInstaller {
 			continue
 		}
 		if err := writeFileEntry(zw, entry.Name(), filepath.Join(bundleDir, entry.Name())); err != nil {
