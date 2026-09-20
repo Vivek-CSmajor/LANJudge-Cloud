@@ -14,8 +14,18 @@ import { useTheme } from './hooks/useTheme'
 // to Add Problems, since both the landing page and Create Contest have
 // nothing left to do for it.
 function AppShell() {
-  const { contest } = useContest()
+  const { contest, setContest } = useContest()
   const [view, setView] = useState(() => (contest ? 'problems' : 'landing'))
+
+  // A deliberate reset, not just a view change: clearing the contest here
+  // means a stale or backend-rejected one (deleted contest, expired access
+  // token) can't bounce the user right back into the same broken state on
+  // their next visit — see AddProblems/GeneratePackage's "No contest
+  // selected" panel, which routes here.
+  function goHome() {
+    setContest(null)
+    setView('landing')
+  }
 
   if (view === 'landing') {
     return <Landing onCreateContest={() => setView('create')} onDownloadClient={() => setView('download-client')} />
@@ -24,12 +34,12 @@ function AppShell() {
     return <DownloadClient onBack={() => setView('landing')} />
   }
   if (view === 'create') {
-    return <CreateContest onContinue={() => setView('problems')} />
+    return <CreateContest onContinue={() => setView('problems')} onHome={goHome} />
   }
   if (view === 'problems') {
-    return <AddProblems onContinue={() => setView('generate')} />
+    return <AddProblems onContinue={() => setView('generate')} onHome={goHome} />
   }
-  return <GeneratePackage />
+  return <GeneratePackage onHome={goHome} />
 }
 
 export default function App() {

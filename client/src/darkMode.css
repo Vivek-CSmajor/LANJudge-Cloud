@@ -27,6 +27,12 @@
   background: rgba(124, 156, 214, 0.16);
   border-color: rgba(124, 156, 214, 0.35);
 }
+[data-theme="dark"] .topbar-home-btn {
+  background: #1c1d24;
+  border-color: #3a3d4a;
+  color: #c7cad1;
+}
+[data-theme="dark"] .topbar-home-btn:hover { background: #23252d; border-color: #454854; color: #93b4e8; }
 
 [data-theme="dark"] .create-card {
   background: #1c1d24;
@@ -235,7 +241,17 @@
 }
 [data-theme="dark"] .cancel-btn:hover:not(:disabled) { background: #23252d; }
 
-[data-theme="dark"] .no-contest-notice { background: #1c1d24; border-color: #2e303a; color: #c7cad1; }
+[data-theme="dark"] .no-contest-state svg { color: #f87171; }
+[data-theme="dark"] .no-contest-state h2 { color: #f1f2f4; }
+[data-theme="dark"] .no-contest-state p { color: #8b8f9c; }
+/* AddProblems' version is its own standalone card (light mode gives it an
+   explicit white background); GeneratePackage's is nested inside
+   .generate-card, which is already dark, so it deliberately has no
+   background of its own in either theme — this only targets the former. */
+[data-theme="dark"] .problems-shell .no-contest-state {
+  background: #1c1d24;
+  border-color: #2e303a;
+}
 
 /* ── Generate & Download page ── */
 [data-theme="dark"] .generate-page {

@@ -33,3 +33,21 @@
   padding: 3px 7px;
   margin-left: 2px;
 }
+
+.topbar-home-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid #e7e7e7;
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: #5a5a5a;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.topbar-home-btn:hover { background: #f7f8fc; border-color: #d5d5d5; color: #3b5998; }

@@ -53,7 +53,7 @@ function validate(form) {
   return errors
 }
 
-export default function CreateContest({ onContinue }) {
+export default function CreateContest({ onContinue, onHome }) {
   const { setContest } = useContest()
 
   const [form, setForm] = useState(loadDraft)
@@ -143,7 +143,7 @@ export default function CreateContest({ onContinue }) {
 
   return (
     <div className="create-page">
-      <CloudHeader />
+      <CloudHeader onHome={onHome} />
 
       <main className="create-main">
         <div className="create-card">

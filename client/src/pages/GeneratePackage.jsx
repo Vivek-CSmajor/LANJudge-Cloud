@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, Circle, AlertCircle, Loader2, Package, Download } from 'lucide-react'
+import { CheckCircle2, Circle, AlertCircle, Loader2, Package, Download, Home } from 'lucide-react'
 import { listProblems } from '../api/problems'
 import { generatePackage, generateBundle } from '../api/packages'
 import { useContest } from '../state/ContestContext'
@@ -43,6 +43,24 @@ function computeReadiness(contest, problems) {
   ]
 }
 
+// Shown any time this page can't actually confirm it has a valid,
+// reachable contest to work with — no contest in state at all, or the
+// backend rejected the one we do have (deleted, or a stale/expired access
+// token). Either way, showing the checklist/generate UI underneath would
+// be pointless, so this replaces it entirely rather than sitting above it.
+function NoContestPanel({ message, onHome }) {
+  return (
+    <div className="no-contest-state">
+      <AlertCircle size={22} strokeWidth={2} />
+      <h2>No contest selected</h2>
+      <p>{message}</p>
+      <button type="button" className="generate-btn" onClick={onHome}>
+        <Home size={16} /> Back to start
+      </button>
+    </div>
+  )
+}
+
 function triggerDownload(blob, filename) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -54,7 +72,7 @@ function triggerDownload(blob, filename) {
   URL.revokeObjectURL(url)
 }
 
-export default function GeneratePackage() {
+export default function GeneratePackage({ onHome }) {
   const { contest } = useContest()
   const contestId = contest?.id
 
@@ -74,7 +92,7 @@ export default function GeneratePackage() {
     let cancelled = false
     setListLoading(true)
     setListError(null)
-    listProblems(contestId)
+    listProblems(contestId, contest.accessToken)
       .then(data => { if (!cancelled) setProblems(data ?? []) })
       .catch(err => { if (!cancelled) setListError(err.message) })
       .finally(() => { if (!cancelled) setListLoading(false) })
@@ -123,11 +141,26 @@ export default function GeneratePackage() {
   if (!contestId) {
     return (
       <div className="generate-page">
-        <CloudHeader />
+        <CloudHeader onHome={onHome} />
         <main className="generate-main">
-          <div className="no-contest-notice">
-            <AlertCircle size={18} />
-            <p>No contest is loaded yet. Create a contest first.</p>
+          <div className="generate-card">
+            <NoContestPanel
+              message="You haven't created a contest yet, or it's no longer available in this browser."
+              onHome={onHome}
+            />
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (!listLoading && listError) {
+    return (
+      <div className="generate-page">
+        <CloudHeader onHome={onHome} />
+        <main className="generate-main">
+          <div className="generate-card">
+            <NoContestPanel message={listError} onHome={onHome} />
           </div>
         </main>
       </div>
@@ -136,7 +169,7 @@ export default function GeneratePackage() {
 
   return (
     <div className="generate-page">
-      <CloudHeader />
+      <CloudHeader onHome={onHome} />
       <main className="generate-main">
         <div className="generate-card">
           <div className="generate-card-header">
@@ -149,11 +182,8 @@ export default function GeneratePackage() {
           {listLoading && (
             <div className="list-status"><Loader2 size={16} className="spin" /> Loading problems…</div>
           )}
-          {listError && (
-            <div className="inline-error"><AlertCircle size={14} /> {listError}</div>
-          )}
 
-          {!listLoading && !listError && (
+          {!listLoading && (
             <>
               <ul className="readiness-list">
                 {readiness.map((item, i) => (

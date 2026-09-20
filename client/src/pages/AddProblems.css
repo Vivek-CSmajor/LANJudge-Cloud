@@ -484,20 +484,30 @@
 .save-problem-btn:hover:not(:disabled) { background: #324b80; }
 .save-problem-btn:disabled, .cancel-btn:disabled { opacity: 0.6; cursor: default; }
 
-/* ── No contest ── */
-.no-contest-notice {
+/* ── No contest / fatal error dead-end ── */
+.no-contest-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  text-align: center;
+  gap: 6px;
   background: #fff;
   border: 1px solid #dadada;
   border-radius: 10px;
-  padding: 16px 18px;
-  color: #5a5a5a;
-  font-size: 13.5px;
+  padding: 32px 24px;
   margin-top: 40px;
+  box-shadow: 0 4px 36px 8px rgba(0, 0, 0, 0.03);
 }
-.no-contest-notice svg { color: #d92d20; flex-shrink: 0; }
+.no-contest-state svg { color: #d92d20; }
+.no-contest-state h2 { font-size: 16px; font-weight: 600; color: #030229; margin: 6px 0 0; }
+.no-contest-state p {
+  font-size: 13.5px;
+  color: rgba(3, 2, 41, 0.65);
+  margin: 0 0 14px;
+  line-height: 1.5;
+  max-width: 380px;
+}
+.no-contest-state .add-problem-btn { width: auto; }
 
 @media (max-width: 720px) {
   .statement-editor, .manual-textareas { grid-template-columns: 1fr; }

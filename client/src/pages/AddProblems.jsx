@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   FileText, Timer, MemoryStick, FileCode, Layers, Upload, Type,
-  Plus, Pencil, Trash2, Loader2, AlertCircle, Info, X, ArrowRight,
+  Plus, Pencil, Trash2, Loader2, AlertCircle, Info, X, ArrowRight, Home,
 } from 'lucide-react'
 import { listProblems, createProblem, updateProblem, deleteProblem } from '../api/problems'
 import { useContest } from '../state/ContestContext'
@@ -92,7 +92,27 @@ async function groupUploadedFiles(fileList) {
   return { entries, errors }
 }
 
-export default function AddProblems({ onContinue }) {
+// Shown any time this page can't actually confirm it has a valid,
+// reachable contest — no contest in state at all, or the backend rejected
+// the one we do have (deleted, or a stale/expired access token). Every
+// action on this page (listing, adding, editing, deleting problems) needs
+// that same contest + token, so there's nothing usable to show underneath
+// it either way — this replaces the whole page rather than sitting above
+// a broken form.
+function NoContestPanel({ message, onHome }) {
+  return (
+    <div className="no-contest-state">
+      <AlertCircle size={22} strokeWidth={2} />
+      <h2>No contest selected</h2>
+      <p>{message}</p>
+      <button type="button" className="add-problem-btn" onClick={onHome}>
+        <Home size={16} /> Back to start
+      </button>
+    </div>
+  )
+}
+
+export default function AddProblems({ onContinue, onHome }) {
   const { contest } = useContest()
   const contestId = contest?.id
 
@@ -294,13 +314,26 @@ export default function AddProblems({ onContinue }) {
   if (!contestId) {
     return (
       <div className="problems-page">
-        <CloudHeader />
+        <CloudHeader onHome={onHome} />
         <main className="problems-main">
           <div className="problems-shell">
-            <div className="no-contest-notice">
-              <AlertCircle size={18} />
-              <p>No contest is loaded yet. Create a contest first.</p>
-            </div>
+            <NoContestPanel
+              message="You haven't created a contest yet, or it's no longer available in this browser."
+              onHome={onHome}
+            />
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (!listLoading && listError) {
+    return (
+      <div className="problems-page">
+        <CloudHeader onHome={onHome} />
+        <main className="problems-main">
+          <div className="problems-shell">
+            <NoContestPanel message={listError} onHome={onHome} />
           </div>
         </main>
       </div>
@@ -309,7 +342,7 @@ export default function AddProblems({ onContinue }) {
 
   return (
     <div className="problems-page">
-      <CloudHeader />
+      <CloudHeader onHome={onHome} />
       <main className="problems-main">
         <div className="problems-shell">
           <div className="problems-list-header">
@@ -333,10 +366,6 @@ export default function AddProblems({ onContinue }) {
 
           {listLoading && (
             <div className="list-status"><Loader2 size={16} className="spin" /> Loading problems…</div>
-          )}
-
-          {listError && (
-            <div className="inline-error"><AlertCircle size={14} /> {listError}</div>
           )}
 
           {!listLoading && !listError && problems.length === 0 && !formOpen && (
