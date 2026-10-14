@@ -31,7 +31,10 @@ jobs:
             # campuscode:campuscode ownership note; that's the likely cause,
             # and it should be resolved deliberately, not patched around here.
             cd /opt/campuscode-cloud
-            git pull
+            # Fetch + hard reset instead of `git pull`: the server checkout diverged
+            # from origin (rewritten history), which makes a plain pull abort.
+            git fetch origin main
+            git reset --hard origin/main
 
             # appleboy/ssh-action runs this as a non-interactive, non-login
             # shell, which does not source /etc/profile.d/go.sh — put Go on
