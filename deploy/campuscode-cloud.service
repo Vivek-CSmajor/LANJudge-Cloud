@@ -1,4 +1,4 @@
-# CampusCode Cloud — systemd service unit
+# LANJudge Cloud — systemd service unit
 #
 # Placeholders to replace before installing this file:
 #   <APP_DIR>   Absolute path where this repo lives on the instance,
@@ -13,7 +13,7 @@
 #   sudo systemctl enable --now campuscode-cloud
 
 [Unit]
-Description=CampusCode Cloud
+Description=LANJudge Cloud
 After=network.target
 
 [Service]

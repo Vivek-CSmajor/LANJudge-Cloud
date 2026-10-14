@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"campuscodecloud/models"
+	"lanjudgecloud/models"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"

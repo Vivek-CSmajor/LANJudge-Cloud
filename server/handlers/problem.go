@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"campuscodecloud/db"
-	"campuscodecloud/models"
-	"campuscodecloud/storage"
+	"lanjudgecloud/db"
+	"lanjudgecloud/models"
+	"lanjudgecloud/storage"
 
 	"gorm.io/gorm"
 )

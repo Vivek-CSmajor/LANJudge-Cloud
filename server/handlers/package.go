@@ -12,11 +12,11 @@ import (
 	"strconv"
 	"strings"
 
-	"campuscodecloud/db"
-	"campuscodecloud/models"
+	"lanjudgecloud/db"
+	"lanjudgecloud/models"
 )
 
-// These mirror CampusCode-Server/Backend/judge/fileSystem.go's Manifest,
+// These mirror LANJudge-Server/Backend/judge/fileSystem.go's Manifest,
 // Problem, and ProblemMeta structs exactly — field names and JSON tags
 // included — since that's the code that will parse what this handler
 // writes. Redeclared here rather than imported because the LAN server is a
@@ -85,7 +85,7 @@ func packageReadinessIssues(contest models.Contest, problems []models.Problem) [
 	return issues
 }
 
-// buildContestPackage builds the exact contest/ tree CampusCode-Server/Backend
+// buildContestPackage builds the exact contest/ tree LANJudge-Server/Backend
 // expects (manifest.json, problems/<n>/meta.json, problems/<n>/statement.md,
 // problems/<n>/tests/<m>.in|out), writing manifest.json/problems at the zip
 // root (no wrapping "contest" folder) so it can be extracted directly into
@@ -155,7 +155,7 @@ func buildContestPackage(contest models.Contest, problems []models.Problem) ([]b
 
 // platformBundleRoot mirrors data/testcases' convention: a pre-populated,
 // read-only tree the server ships alongside its own binary. Each platform's
-// directory holds everything CampusCode-Server's Part 2 packaging step
+// directory holds everything LANJudge-Server's Part 2 packaging step
 // produced for it — the LAN server binary, the Docker setup script(s), a
 // README, and the Electron participant client installer. The organizer
 // bundle below (GenerateBundleHandler) zips up everything except that last

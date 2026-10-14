@@ -30,7 +30,7 @@ export function apiFetch(path, options = {}) {
       // misconfig, the server being down) is visible in devtools instead
       // of looking identical to "the user's WiFi is down."
       console.error('apiFetch failed:', err)
-      throw new Error("Couldn't reach the CampusCode Cloud server. Check your connection and try again.")
+      throw new Error("Couldn't reach the LANJudge Cloud server. Check your connection and try again.")
     },
   )
 }

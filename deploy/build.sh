@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Builds CampusCode Cloud end to end, in the order that matters:
+# Builds LANJudge Cloud end to end, in the order that matters:
 #   1. Frontend (client/) — vite.config.js writes its output straight into
 #      server/web/dist.
 #   2. Backend (server/) — embeds that directory via go:embed (see

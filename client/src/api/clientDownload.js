@@ -30,7 +30,7 @@ export async function downloadClientInstaller(platform) {
 
   const disposition = res.headers.get('Content-Disposition') ?? ''
   const match = disposition.match(/filename="?([^"]+)"?/)
-  const filename = match ? match[1] : `campuscode-client-${platform}`
+  const filename = match ? match[1] : `lanjudge-client-${platform}`
 
   return { blob: await res.blob(), filename }
 }

@@ -1,6 +1,6 @@
-# CampusCode Cloud — Code Audit
+# LANJudge Cloud — Code Audit
 
-**Scope:** `CampusCode-Cloud/server/` (Go) and `CampusCode-Cloud/client/` (React), plus `deploy/` where it directly affects whether the backend runs correctly. Every source file was read in full. No fixes applied — findings only.
+**Scope:** `LANJudge-Cloud/server/` (Go) and `LANJudge-Cloud/client/` (React), plus `deploy/` where it directly affects whether the backend runs correctly. Every source file was read in full. No fixes applied — findings only.
 
 **Method:** static read of all 10 Go files and 15 JS/JSX files, cross-checked against the actual route table and a `grep` sweep for any auth mechanism (`session`, `apikey`, `bearer`, `authorization`, `middleware`, `jwt` — all zero hits across the entire server).
 
@@ -99,7 +99,7 @@ The comment is honest about what this does — it's not a size limit, it's a mem
 }).then(
   (res) => res,
   () => {
-    throw new Error("Couldn't reach the CampusCode Cloud server. Check your connection and try again.")
+    throw new Error("Couldn't reach the LANJudge Cloud server. Check your connection and try again.")
   },
 )
 ```
@@ -137,7 +137,7 @@ if err != nil {
 }
 ```
 
-Same shape as `CampusCode-Server/Backend`'s equivalent, audited earlier this session. Here it matters slightly more because `deploy/campuscode-cloud.service` sets `Restart=on-failure` with `RestartSec=5` — a *persistently* broken environment (wrong permissions on `data/`, a corrupted sqlite file, a full disk) doesn't fail once with a clear message in the journal; it panics, restarts, panics again, forever, every 5 seconds.
+Same shape as `LANJudge-Server/Backend`'s equivalent, audited earlier this session. Here it matters slightly more because `deploy/campuscode-cloud.service` sets `Restart=on-failure` with `RestartSec=5` — a *persistently* broken environment (wrong permissions on `data/`, a corrupted sqlite file, a full disk) doesn't fail once with a clear message in the journal; it panics, restarts, panics again, forever, every 5 seconds.
 
 ### 9. No owner/tenant field on `Contest` at all
 

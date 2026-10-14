@@ -1,5 +1,5 @@
 /* ────────────────────────────────────────────────────────────────────────
-   Dark mode — purely additive overrides, same pattern as CampusCode-Client:
+   Dark mode — purely additive overrides, same pattern as LANJudge-Client:
    every rule is scoped under [data-theme="dark"], which always outweighs
    the plain-class light-mode rule it replaces (attribute selector + class
    beats class alone), so light mode is unaffected regardless of source

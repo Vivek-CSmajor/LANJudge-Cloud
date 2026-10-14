@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	"campuscodecloud/db"
-	"campuscodecloud/models"
+	"lanjudgecloud/db"
+	"lanjudgecloud/models"
 )
 
 type createContestRequest struct {

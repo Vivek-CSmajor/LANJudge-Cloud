@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"campuscodecloud/db"
-	"campuscodecloud/handlers"
+	"lanjudgecloud/db"
+	"lanjudgecloud/handlers"
 )
 
 // Restricted to the Vite dev server's origin rather than "*" — the built
@@ -55,7 +55,7 @@ func main() {
 	http.HandleFunc("GET /client-download/{platform}", handlers.ClientDownloadHandler)
 
 	// Embedded static frontend — fallback, only catches what nothing above
-	// matched (same pattern as CampusCode-Server/Backend/api/server.go).
+	// matched (same pattern as LANJudge-Server/Backend/api/server.go).
 	http.Handle("/", frontendHandler())
 
 	// $PORT is read from the environment (e.g. set in the systemd unit's
@@ -66,7 +66,7 @@ func main() {
 		port = "8081"
 	}
 
-	log.Printf("CampusCode Cloud server listening on :%s\n", port)
+	log.Printf("LANJudge Cloud server listening on :%s\n", port)
 	if err := http.ListenAndServe(":"+port, cors(http.DefaultServeMux)); err != nil {
 		log.Fatal("Server failed to start: ", err)
 	}

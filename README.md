@@ -1,16 +1,16 @@
-# CampusCode Cloud
+# LANJudge Cloud
 
-The contest-authoring web app for [CampusCode](#part-of-campuscode). Organisers use it, while they're still online, to create a contest, write its problems and test cases, and download a ready-to-run bundle for the offline contest server. Participants use it to download the CampusCode client app.
+The contest-authoring web app for [LANJudge](#part-of-lanjudge). Organisers use it, while they're still online, to create a contest, write its problems and test cases, and download a ready-to-run bundle for the offline contest server. Participants use it to download the LANJudge client app.
 
 Nothing is judged here. Cloud only prepares the contest. The contest itself runs offline on the organiser's laptop.
 
-## Part of CampusCode
+## Part of LANJudge
 
 | Repo | What it does |
 |---|---|
-| **CampusCode-Cloud** (this repo) | Author a contest and export it as a package |
-| [CampusCode-Server](../CampusCode-Server) | Runs the contest offline on the organiser's laptop: judging, scoreboard, admin dashboard |
-| [CampusCode-Client](../CampusCode-Client) | The participant app (Electron) |
+| **LANJudge-Cloud** (this repo) | Author a contest and export it as a package |
+| [LANJudge-Server](../LANJudge-Server) | Runs the contest offline on the organiser's laptop: judging, scoreboard, admin dashboard |
+| [LANJudge-Client](../LANJudge-Client) | The participant app (Electron) |
 
 ## What it does
 
@@ -20,7 +20,7 @@ Nothing is judged here. Cloud only prepares the contest. The contest itself runs
 - **Check readiness.** Before anything is generated, a checklist confirms the contest has a name, duration and admin credentials, and that every problem has a title, valid limits, a statement and at least one test case. The server checks again on download.
 - **Download an organiser bundle** for Windows, macOS (Intel) or macOS (Apple Silicon). It is a single zip containing:
   - `contest-package.zip`: `manifest.json`, plus each problem's `meta.json`, `statement.md` and `tests/`
-  - the CampusCode-Server binary for that platform
+  - the LANJudge-Server binary for that platform
   - the Docker setup script and a short README for the platform
 - **Download the participant app.** A public page serves the client installer for each platform, with no contest or token needed.
 
@@ -33,7 +33,7 @@ flowchart LR
     Org["Organiser<br/>(browser)"]
     Part["Participant<br/>(browser)"]
 
-    subgraph Cloud["CampusCode Cloud (AWS)"]
+    subgraph Cloud["LANJudge Cloud (AWS)"]
         UI["Web app"]
         API["Go API"]
         DB[("SQLite<br/>contests, problems,<br/>test-case records")]
@@ -58,7 +58,7 @@ flowchart LR
     Bundles -->|"client installer"| API
     API ==>|"installer"| Part
 
-    Org -.->|"runs offline on contest day"| Server["CampusCode-Server<br/>(organiser's laptop)"]
+    Org -.->|"runs offline on contest day"| Server["LANJudge-Server<br/>(organiser's laptop)"]
     Part -.->|"joins over the LAN"| Server
 ```
 

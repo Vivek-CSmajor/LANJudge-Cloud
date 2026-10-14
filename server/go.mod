@@ -1,4 +1,4 @@
-module campuscodecloud
+module lanjudgecloud
 
 go 1.24.0
 

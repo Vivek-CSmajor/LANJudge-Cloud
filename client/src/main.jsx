@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client'
-// Self-hosted (no CDN, no network at runtime) — matches CampusCode-Client,
+// Self-hosted (no CDN, no network at runtime) — matches LANJudge-Client,
 // since this app is expected to run fully offline on the same LAN setup.
 import '@fontsource/fira-code/400.css'
 import '@fontsource/fira-code/500.css'

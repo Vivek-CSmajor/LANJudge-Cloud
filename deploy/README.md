@@ -1,4 +1,4 @@
-# Deploying CampusCode Cloud to an EC2 instance
+# Deploying LANJudge Cloud to an EC2 instance
 
 Single Go binary (embeds the built React frontend via `go:embed`), run as a
 systemd service on a plain Ubuntu EC2 instance. No containers, no
@@ -91,7 +91,7 @@ sudo nano /etc/systemd/system/campuscode-cloud.service
 
 Replace the placeholders:
 - `<APP_DIR>` → `/opt/campuscode-cloud`
-- `<APP_USER>` → `campuscode`
+- `<APP_USER>` → `lanjudge`
 
 Then:
 
