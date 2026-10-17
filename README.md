@@ -127,3 +127,7 @@ deploy/                build script and systemd unit
 - **The admin password is stored in plain text.** The contest server compares it literally against what the admin types, so it can't be hashed.
 - **The hosted app is served over plain HTTP.** The contest admin password you enter is sent unencrypted, so choose one you don't reuse elsewhere.
 - **The contest duration is recorded, not enforced.** The contest server takes its duration from what the admin enters when pressing Start on contest day.
+
+## License
+
+[MIT](LICENSE) © 2026 Vivek Pandey
